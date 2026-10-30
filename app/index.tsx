@@ -283,12 +283,17 @@ const styles = StyleSheet.create({
   scrollArea: {
     flex: 1,
     width: '100%',
+    ...Platform.select({
+      web: {
+        overflowY: 'auto' as any,
+      },
+    }),
   },
   scrollContent: {
-    paddingBottom: 24,
+    paddingBottom: 16,
   },
   scrollBottomSpacer: {
-    height: 156, // Ensures content is completely scrollable above the bottom dock
+    height: 175, // Generous spacer ensures Your Collections is fully visible above floating mini-player
   },
   bottomDock: {
     position: 'absolute',
@@ -299,6 +304,7 @@ const styles = StyleSheet.create({
     maxWidth: Layout.maxWidth,
     backgroundColor: Colors.background,
     zIndex: 100,
+    paddingTop: 6,
   },
   toastContainer: {
     position: 'absolute',

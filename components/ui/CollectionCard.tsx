@@ -37,12 +37,12 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
                 collection.iconName === 'heart'
                   ? 'heart'
                   : collection.iconName === 'arrow-down'
-                  ? 'arrow-down'
+                  ? 'download-outline'
                   : collection.iconName === 'person'
                   ? 'person'
                   : 'disc'
               }
-              size={15}
+              size={16}
               color={collection.iconColor || Colors.forest.primary}
             />
           </View>

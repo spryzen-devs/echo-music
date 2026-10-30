@@ -156,6 +156,16 @@ export const mockCollections: CollectionItem[] = [
     bgColor: '#E3ECE6',
   },
   {
+    id: 'col-fav-artists',
+    title: 'Indie Pioneers',
+    subtitle: '14 artists',
+    category: 'Artists',
+    type: 'icon',
+    iconName: 'person',
+    iconColor: '#345242',
+    bgColor: '#DCE8E0',
+  },
+  {
     id: 'col-vinyl',
     title: 'Vinyl Rotations',
     subtitle: '42 albums',
@@ -164,6 +174,16 @@ export const mockCollections: CollectionItem[] = [
     iconName: 'disc',
     iconColor: '#345242',
     bgColor: '#E3ECE6',
+  },
+  {
+    id: 'col-heavy-rotation',
+    title: 'Heavy Rotation',
+    subtitle: '26 albums',
+    category: 'Albums',
+    type: 'icon',
+    iconName: 'disc',
+    iconColor: '#345242',
+    bgColor: '#DCE8E0',
   },
 ];
 

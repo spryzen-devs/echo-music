@@ -36,6 +36,9 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
           imageStyle={styles.image}
           resizeMode="cover"
         >
+          {/* Subtle atmospheric tint overlay on left to guarantee text readability */}
+          <View style={styles.textBackdrop} />
+
           {/* Content Overlay */}
           <View style={styles.content}>
             {/* Eyebrow Label */}
@@ -109,34 +112,52 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'space-between',
     padding: 20,
+    position: 'relative',
   },
   image: {
     borderRadius: Radius.xxl,
+  },
+  textBackdrop: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: '58%',
+    backgroundColor: 'rgba(245, 241, 233, 0.28)',
+    borderTopLeftRadius: Radius.xxl,
+    borderBottomLeftRadius: Radius.xxl,
   },
   content: {
     width: '60%',
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
+    zIndex: 2,
   },
   eyebrow: {
     ...Typography.eyebrow,
-    color: Colors.forest.primary,
+    color: '#1C3528',
     marginBottom: 8,
-    opacity: 0.85,
+    fontWeight: '700',
+    letterSpacing: 1.6,
   },
   title: {
     ...Typography.heroTitle,
-    color: Colors.text.primary,
+    color: '#101B14',
     marginBottom: 8,
     fontSize: 29,
     lineHeight: 34,
+    fontWeight: '600',
+    textShadowColor: 'rgba(255, 255, 255, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   subtitle: {
     ...Typography.cardSubtitle,
-    color: Colors.text.accent,
+    color: '#26382E',
     lineHeight: 18,
     marginBottom: 16,
-    opacity: 0.9,
+    fontWeight: '500',
+    fontSize: 12.5,
   },
   playMixButton: {
     flexDirection: 'row',
@@ -170,6 +191,7 @@ const styles = StyleSheet.create({
     gap: 6,
     alignSelf: 'center',
     marginBottom: 2,
+    zIndex: 2,
   },
   paginationDot: {
     height: 3,
@@ -181,7 +203,7 @@ const styles = StyleSheet.create({
   },
   paginationDotInactive: {
     width: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
 });
 
