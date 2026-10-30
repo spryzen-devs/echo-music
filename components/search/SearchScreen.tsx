@@ -143,12 +143,14 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+    flexGrow: 1,
   },
   sheetContainer: {
     backgroundColor: Colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     marginTop: -16, // Seamless overlap onto hero background as shown in reference
+    flex: 1,
     minHeight: 500,
   },
   bottomSpacer: {
@@ -157,3 +159,4 @@ const styles = StyleSheet.create({
 });
 
 export default SearchScreen;
+

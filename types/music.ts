@@ -14,3 +14,4 @@ export interface RecentSearchItem {
   id: string;
   query: string;
 }
+

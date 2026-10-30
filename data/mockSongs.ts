@@ -57,3 +57,4 @@ export const initialRecentSearches: string[] = [
   'Joji',
   'Radiohead',
 ];
+

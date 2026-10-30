@@ -17,3 +17,4 @@ export function searchSongs(query: string, songs: Song[]): Song[] {
     return titleMatch || artistMatch || albumMatch;
   });
 }
+

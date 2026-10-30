@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
   Pressable,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { UserProfile } from '../../types';
@@ -129,7 +130,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: 340,
+    height: 350,
     backgroundColor: Colors.background,
     overflow: 'hidden',
   },
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
   contentOverlay: {
     flex: 1,
     paddingHorizontal: Spacing.screenPadding,
-    paddingTop: Spacing.md,
+    paddingTop: Platform.OS === 'web' ? 36 : 28,
     justifyContent: 'flex-start',
   },
   topRow: {
@@ -171,6 +172,11 @@ const styles = StyleSheet.create({
   },
   avatarButton: {
     marginTop: 4,
+    ...Platform.select({
+      web: {
+        cursor: 'pointer',
+      } as any,
+    }),
   },
   avatar: {
     width: 38,
@@ -183,13 +189,18 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    backgroundColor: 'rgba(255, 255, 255, 0.90)',
     borderRadius: Radius.full,
     paddingHorizontal: 16,
     height: 48,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.95)',
-    marginBottom: 24,
+    marginBottom: 20,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(10px)',
+      } as any,
+    }),
   },
   searchIcon: {
     marginRight: 10,
@@ -202,14 +213,31 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     height: '100%',
     fontWeight: '400',
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+        outlineWidth: 0,
+        boxShadow: 'none',
+      } as any,
+    }),
   },
   clearButton: {
     padding: 4,
     marginRight: 4,
+    ...Platform.select({
+      web: {
+        cursor: 'pointer',
+      } as any,
+    }),
   },
   micButton: {
     padding: 4,
     marginLeft: 4,
+    ...Platform.select({
+      web: {
+        cursor: 'pointer',
+      } as any,
+    }),
   },
   mottoContainer: {
     marginTop: 10,
@@ -221,11 +249,11 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 14,
     letterSpacing: 3,
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: 'rgba(255, 255, 255, 0.88)',
     fontWeight: '600',
-    textShadowColor: 'rgba(0, 0, 0, 0.35)',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    textShadowRadius: 2,
   },
   pressed: {
     opacity: 0.7,

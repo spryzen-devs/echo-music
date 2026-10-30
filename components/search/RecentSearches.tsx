@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
@@ -114,6 +115,13 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     borderWidth: 0.5,
     borderColor: 'rgba(232, 226, 216, 0.7)',
+    marginRight: 8,
+    ...Platform.select({
+      web: {
+        cursor: 'pointer',
+        userSelect: 'none',
+      } as any,
+    }),
   },
   chipIcon: {
     marginRight: 6,
@@ -131,6 +139,11 @@ const styles = StyleSheet.create({
   clearButton: {
     paddingVertical: 4,
     paddingHorizontal: 2,
+    ...Platform.select({
+      web: {
+        cursor: 'pointer',
+      } as any,
+    }),
   },
   emptyContainer: {
     paddingHorizontal: Spacing.screenPadding,
@@ -148,3 +161,4 @@ const styles = StyleSheet.create({
 });
 
 export default RecentSearches;
+
