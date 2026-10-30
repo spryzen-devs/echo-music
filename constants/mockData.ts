@@ -4,6 +4,7 @@ import {
   AlbumItem,
   PlaylistItem,
   CollectionItem,
+  CollectionCategory,
   Track,
 } from '../types';
 
