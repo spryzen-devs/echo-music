@@ -32,14 +32,14 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
 }) => {
   return (
     <View style={styles.outerContainer}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Now playing: ${track.title} by ${track.artist}`}
-        style={[styles.container, Shadows.floating]}
-        onPress={onPressTrack}
-      >
-        {/* Left: Thumbnail & Track Details */}
-        <View style={styles.trackInfo}>
+      <View style={[styles.container, Shadows.floating]}>
+        {/* Left: Thumbnail & Track Details - Pressable for Track details */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Now playing: ${track.title} by ${track.artist}`}
+          style={({ pressed }) => [styles.trackInfo, pressed && styles.trackPressed]}
+          onPress={onPressTrack}
+        >
           <Image source={track.artwork} style={styles.artwork} resizeMode="cover" />
           <View style={styles.textContainer}>
             <Text style={styles.title} numberOfLines={1}>
@@ -49,26 +49,26 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               {track.artist}
             </Text>
           </View>
-        </View>
+        </Pressable>
 
-        {/* Right: Controls */}
+        {/* Right: Controls - Sibling buttons (NOT nested) */}
         <View style={styles.controls}>
           {/* Favorite Button */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={track.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-            hitSlop={10}
+            hitSlop={8}
             style={({ pressed }) => [styles.controlButton, pressed && styles.controlPressed]}
             onPress={onToggleFavorite}
           >
             <Ionicons
               name={track.isFavorite ? 'heart' : 'heart-outline'}
-              size={21}
-              color={track.isFavorite ? '#E08585' : Colors.text.light}
+              size={20}
+              color={track.isFavorite ? '#E57373' : Colors.text.light}
             />
           </Pressable>
 
-          {/* Play / Pause Circular Button */}
+          {/* Play / Pause Circular White Button */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
@@ -80,7 +80,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           >
             <Ionicons
               name={isPlaying ? 'pause' : 'play'}
-              size={17}
+              size={16}
               color={Colors.forest.primary}
               style={!isPlaying ? styles.playIconOffset : undefined}
             />
@@ -90,18 +90,18 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Next track"
-            hitSlop={10}
+            hitSlop={8}
             style={({ pressed }) => [styles.controlButton, pressed && styles.controlPressed]}
             onPress={onNextTrack}
           >
             <Ionicons
               name="play-skip-forward"
-              size={19}
+              size={18}
               color={Colors.text.light}
             />
           </Pressable>
         </View>
-      </Pressable>
+      </View>
     </View>
   );
 };
@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
   outerContainer: {
     paddingHorizontal: Spacing.screenPadding,
     marginBottom: 8,
+    width: '100%',
   },
   container: {
     flexDirection: 'row',
@@ -119,13 +120,17 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xxl,
     paddingVertical: 7,
     paddingHorizontal: 10,
-    height: 56,
+    height: 54,
+    width: '100%',
   },
   trackInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
     paddingRight: Spacing.sm,
+  },
+  trackPressed: {
+    opacity: 0.8,
   },
   artwork: {
     width: 40,
@@ -182,4 +187,3 @@ const styles = StyleSheet.create({
 });
 
 export default MiniPlayer;
-

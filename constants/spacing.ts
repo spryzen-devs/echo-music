@@ -27,9 +27,9 @@ export const Radius = {
 export const Layout = {
   maxWidth: 440, // Centered desktop preview width
   albumCardWidth: 108,
-  playlistCardWidth: 110,
-  playlistCardHeight: 124,
-  collectionCardWidth: 108,
+  playlistCardWidth: 122,
+  playlistCardHeight: 128,
+  collectionCardWidth: 112,
   bottomNavHeight: 68,
   miniPlayerHeight: 58,
 };

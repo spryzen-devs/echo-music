@@ -23,12 +23,20 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
   onPress,
   onPlayPress,
 }) => {
+  const handlePress = () => {
+    if (onPlayPress) {
+      onPlayPress(playlist);
+    } else {
+      onPress(playlist);
+    }
+  };
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Playlist ${playlist.title}, ${playlist.subtitle}`}
       style={({ pressed }) => [styles.container, pressed && styles.pressed]}
-      onPress={() => onPress(playlist)}
+      onPress={handlePress}
     >
       <ImageBackground
         source={playlist.artwork}
@@ -48,28 +56,15 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
               </Text>
             </View>
 
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Play ${playlist.title}`}
-              style={({ pressed }) => [
-                styles.playButton,
-                pressed && styles.playButtonPressed,
-              ]}
-              onPress={() => {
-                if (onPlayPress) {
-                  onPlayPress(playlist);
-                } else {
-                  onPress(playlist);
-                }
-              }}
-            >
+            {/* Visual play button - Single tap on card plays playlist */}
+            <View style={styles.playButton}>
               <Ionicons
                 name="play"
                 size={11}
                 color={Colors.text.light}
                 style={styles.playIcon}
               />
-            </Pressable>
+            </View>
           </View>
         </View>
       </ImageBackground>
@@ -79,8 +74,8 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: 112,
-    height: 126,
+    width: 122,
+    height: 128,
     marginRight: Spacing.md,
     borderRadius: Radius.xl,
     overflow: 'hidden',
@@ -122,7 +117,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...Typography.cardSubtitle,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(255, 255, 255, 0.82)',
     fontSize: 11,
     lineHeight: 14,
     marginTop: 1,
@@ -134,7 +129,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: 'rgba(42, 66, 52, 0.85)',
+    backgroundColor: 'rgba(42, 66, 52, 0.88)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 0.5,
@@ -143,10 +138,6 @@ const styles = StyleSheet.create({
   playIcon: {
     marginLeft: 1.5,
   },
-  playButtonPressed: {
-    backgroundColor: Colors.forest.dark,
-    transform: [{ scale: 0.92 }],
-  },
   pressed: {
     opacity: 0.9,
     transform: [{ scale: 0.98 }],
@@ -154,4 +145,3 @@ const styles = StyleSheet.create({
 });
 
 export default PlaylistCard;
-

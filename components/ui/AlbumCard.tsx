@@ -24,25 +24,35 @@ export const AlbumCard: React.FC<AlbumCardProps> = ({
   onMenuPress,
 }) => {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Album ${album.title} by ${album.artist}`}
-      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
-      onPress={() => onPress(album)}
-    >
-      <View style={styles.imageWrapper}>
+    <View style={styles.container}>
+      {/* Artwork Button */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Album ${album.title} by ${album.artist}`}
+        style={({ pressed }) => [styles.imageWrapper, pressed && styles.pressed]}
+        onPress={() => onPress(album)}
+      >
         <Image source={album.artwork} style={styles.image} resizeMode="cover" />
-      </View>
+      </Pressable>
 
+      {/* Info Row: Title on Left, Three-dot Menu on Right */}
       <View style={styles.infoRow}>
-        <Text style={styles.title} numberOfLines={1}>
-          {album.title}
-        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${album.title}`}
+          style={styles.titlePressable}
+          onPress={() => onPress(album)}
+        >
+          <Text style={styles.title} numberOfLines={1}>
+            {album.title}
+          </Text>
+        </Pressable>
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Options for ${album.title}`}
           hitSlop={8}
-          style={styles.menuButton}
+          style={({ pressed }) => [styles.menuButton, pressed && styles.menuPressed]}
           onPress={() => onMenuPress && onMenuPress(album)}
         >
           <Ionicons
@@ -56,7 +66,7 @@ export const AlbumCard: React.FC<AlbumCardProps> = ({
       <Text style={styles.artist} numberOfLines={1}>
         {album.artist}
       </Text>
-    </Pressable>
+    </View>
   );
 };
 
@@ -83,14 +93,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 2,
   },
-  title: {
-    ...Typography.cardTitle,
-    color: Colors.text.primary,
+  titlePressable: {
     flex: 1,
     paddingRight: 2,
   },
+  title: {
+    ...Typography.cardTitle,
+    color: Colors.text.primary,
+  },
   menuButton: {
     padding: 2,
+  },
+  menuPressed: {
+    opacity: 0.6,
   },
   artist: {
     ...Typography.cardSubtitle,
@@ -103,4 +118,3 @@ const styles = StyleSheet.create({
 });
 
 export default AlbumCard;
-

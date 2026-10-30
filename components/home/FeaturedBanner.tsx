@@ -27,18 +27,9 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
   if (!banners || banners.length === 0) return null;
   const currentBanner = banners[activeIndex] || banners[0];
 
-  const handleNextBanner = () => {
-    setActiveIndex((prev) => (prev + 1) % banners.length);
-  };
-
   return (
     <View style={styles.container}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Featured banner: ${currentBanner.title.replace('\n', ' ')}`}
-        style={[styles.bannerWrapper, Shadows.card]}
-        onPress={handleNextBanner}
-      >
+      <View style={[styles.bannerWrapper, Shadows.card]}>
         <ImageBackground
           source={currentBanner.artwork}
           style={styles.imageBackground}
@@ -83,7 +74,9 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
               return (
                 <Pressable
                   key={index}
-                  hitSlop={6}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Switch to banner ${index + 1}`}
                   onPress={() => setActiveIndex(index)}
                   style={[
                     styles.paginationDot,
@@ -94,7 +87,7 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
             })}
           </View>
         </ImageBackground>
-      </Pressable>
+      </View>
     </View>
   );
 };
@@ -121,7 +114,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xxl,
   },
   content: {
-    width: '58%',
+    width: '60%',
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
   },
@@ -129,7 +122,7 @@ const styles = StyleSheet.create({
     ...Typography.eyebrow,
     color: Colors.forest.primary,
     marginBottom: 8,
-    opacity: 0.8,
+    opacity: 0.85,
   },
   title: {
     ...Typography.heroTitle,
@@ -193,4 +186,3 @@ const styles = StyleSheet.create({
 });
 
 export default FeaturedBanner;
-

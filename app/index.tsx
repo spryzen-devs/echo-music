@@ -123,7 +123,6 @@ export default function HomeScreen() {
   };
 
   const handleNextTrack = () => {
-    // Cycle to next song in recently played or mock pool
     const currentIndex = mockRecentlyPlayed.findIndex(
       (a) => a.title === currentTrack.title
     );
@@ -253,52 +252,66 @@ const styles = StyleSheet.create({
   },
   outerContainer: {
     flex: 1,
-    backgroundColor: Platform.OS === 'web' ? '#EAE5DC' : Colors.background,
+    width: '100%',
+    backgroundColor: Platform.OS === 'web' ? '#EDE8DF' : Colors.background,
     justifyContent: 'center',
     alignItems: 'center',
+    ...Platform.select({
+      web: {
+        height: '100%',
+        minHeight: '100vh',
+        overflow: 'hidden',
+      },
+    }),
   },
   appContainer: {
     flex: 1,
     width: '100%',
     maxWidth: Layout.maxWidth,
     backgroundColor: Colors.background,
-    overflow: 'hidden',
     position: 'relative',
+    overflow: 'hidden',
+    alignSelf: 'center',
     ...Platform.select({
       web: {
         height: '100%',
-        boxShadow: '0 12px 40px rgba(24, 36, 29, 0.12)',
+        maxHeight: '100vh',
+        boxShadow: '0 8px 36px rgba(24, 36, 29, 0.12)',
       },
     }),
   },
   scrollArea: {
     flex: 1,
+    width: '100%',
   },
   scrollContent: {
-    paddingBottom: 16,
+    paddingBottom: 24,
   },
   scrollBottomSpacer: {
-    height: 140, // Ensures content is fully scrollable above fixed bottom dock
+    height: 156, // Ensures content is completely scrollable above the bottom dock
   },
   bottomDock: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'transparent',
+    width: '100%',
+    maxWidth: Layout.maxWidth,
+    backgroundColor: Colors.background,
+    zIndex: 100,
   },
   toastContainer: {
     position: 'absolute',
-    bottom: 144,
+    bottom: 148,
     left: 20,
     right: 20,
-    backgroundColor: 'rgba(24, 36, 29, 0.92)',
+    backgroundColor: 'rgba(24, 36, 29, 0.94)',
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 99,
+    zIndex: 200,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.18,
