@@ -10,6 +10,7 @@ export { FeaturedBanner } from './home/FeaturedBanner';
 export { RecentlyPlayed } from './home/RecentlyPlayed';
 export { PlaylistSection } from './home/PlaylistSection';
 export { CollectionsSection } from './home/CollectionsSection';
+export { TabPlaceholder } from './home/TabPlaceholder';
 
 // Player & Navigation Components
 export { MiniPlayer } from './player/MiniPlayer';

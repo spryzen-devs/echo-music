@@ -5,7 +5,6 @@ import {
   ScrollView,
   Platform,
   Alert,
-  Text,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -40,6 +39,7 @@ import {
   CollectionsSection,
   MiniPlayer,
   BottomNavigation,
+  TabPlaceholder,
 } from '../components';
 
 export default function HomeScreen() {
@@ -47,13 +47,6 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState<NavigationTab>('Home');
   const [currentTrack, setCurrentTrack] = useState<Track>(initialTrack);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [activeToast, setActiveToast] = useState<string | null>(null);
-
-  // Helper notification / interaction
-  const showFeedback = (message: string) => {
-    setActiveToast(message);
-    setTimeout(() => setActiveToast(null), 2400);
-  };
 
   // Banner Play Mix action
   const handlePlayMix = (banner: FeaturedBannerItem) => {
@@ -65,7 +58,6 @@ export default function HomeScreen() {
       isFavorite: false,
     });
     setIsPlaying(true);
-    showFeedback(`Now Playing: ${banner.mixTrackTitle}`);
   };
 
   // Album play action
@@ -78,11 +70,10 @@ export default function HomeScreen() {
       isFavorite: currentTrack.id === `album-${album.id}` ? currentTrack.isFavorite : false,
     });
     setIsPlaying(true);
-    showFeedback(`Playing: ${album.title} by ${album.artist}`);
   };
 
   const handleAlbumMenu = (album: AlbumItem) => {
-    const msg = `Options for ${album.title} - Share, Add to Playlist, View Album details.`;
+    const msg = `Options for "${album.title}" by ${album.artist}`;
     if (Platform.OS === 'web') {
       window.alert(msg);
     } else {
@@ -100,26 +91,51 @@ export default function HomeScreen() {
       isFavorite: false,
     });
     setIsPlaying(true);
-    showFeedback(`Playing Playlist: ${playlist.title}`);
   };
 
   // Collection card press action
   const handleCollectionPress = (collection: CollectionItem) => {
-    showFeedback(`Opened Collection: ${collection.title} (${collection.subtitle})`);
+    // If the collection is a playlist like Liked Songs, update playback
+    if (collection.id === 'col-liked') {
+      setCurrentTrack({
+        id: 'track-liked-first',
+        title: 'Nikes',
+        artist: 'Frank Ocean',
+        artwork: require('../assets/images/music/album_blonde.png'),
+        isFavorite: true,
+      });
+      setIsPlaying(true);
+    } else if (collection.id === 'col-top-mix') {
+      setCurrentTrack({
+        id: 'track-top-mix',
+        title: 'EARFQUAKE',
+        artist: 'Tyler, The Creator',
+        artwork: require('../assets/images/music/album_igor.png'),
+        isFavorite: false,
+      });
+      setIsPlaying(true);
+    } else if (collection.id === 'col-downloaded') {
+      setCurrentTrack({
+        id: 'track-downloaded',
+        title: 'The Less I Know The Better',
+        artist: 'Tame Impala',
+        artwork: require('../assets/images/music/album_currents.png'),
+        isFavorite: false,
+      });
+      setIsPlaying(true);
+    }
   };
 
   // Mini player controls
   const handleTogglePlay = () => {
     setIsPlaying((prev) => !prev);
-    showFeedback(isPlaying ? 'Playback paused' : `Resumed: ${currentTrack.title}`);
   };
 
   const handleToggleFavorite = () => {
-    setCurrentTrack((prev) => {
-      const nextFav = !prev.isFavorite;
-      showFeedback(nextFav ? 'Added to Liked Songs' : 'Removed from Liked Songs');
-      return { ...prev, isFavorite: nextFav };
-    });
+    setCurrentTrack((prev) => ({
+      ...prev,
+      isFavorite: !prev.isFavorite,
+    }));
   };
 
   const handleNextTrack = () => {
@@ -139,16 +155,20 @@ export default function HomeScreen() {
       isFavorite: false,
     });
     setIsPlaying(true);
-    showFeedback(`Next track: ${nextAlbum.title}`);
   };
 
   // Header button handlers
   const handleNotificationPress = () => {
-    showFeedback('No new notifications. Your library is up to date.');
+    // Informative alert without disruptive toast
+    if (Platform.OS === 'web') {
+      window.alert('Notifications: No new alerts. Your Echo library is up to date.');
+    } else {
+      Alert.alert('Notifications', 'No new alerts. Your Echo library is up to date.');
+    }
   };
 
   const handleSettingsPress = () => {
-    showFeedback('Settings: Audio Quality: Lossless • Theme: Warm Ivory');
+    setActiveTab('Profile');
   };
 
   const handleProfilePress = () => {
@@ -157,9 +177,6 @@ export default function HomeScreen() {
 
   const handleTabChange = (tab: NavigationTab) => {
     setActiveTab(tab);
-    if (tab !== 'Home') {
-      showFeedback(`Switched to ${tab} tab (Preview mode)`);
-    }
   };
 
   return (
@@ -169,62 +186,63 @@ export default function HomeScreen() {
       {/* Main Container - Centered on Web Desktop, Full on Mobile */}
       <View style={styles.outerContainer}>
         <View style={styles.appContainer}>
-          {/* Main Scrollable Content */}
-          <ScrollView
-            style={styles.scrollArea}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* A. Header */}
-            <HomeHeader
+          {/* Active Tab Screen Content */}
+          {activeTab === 'Home' ? (
+            <ScrollView
+              style={styles.scrollArea}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* A. Header */}
+              <HomeHeader
+                user={mockUser}
+                onNotificationPress={handleNotificationPress}
+                onSettingsPress={handleSettingsPress}
+                onProfilePress={handleProfilePress}
+              />
+
+              {/* B. Featured Music Banner */}
+              <FeaturedBanner
+                banners={mockFeaturedBanners}
+                onPlayMix={handlePlayMix}
+              />
+
+              {/* C. Recently Played */}
+              <RecentlyPlayed
+                albums={mockRecentlyPlayed}
+                onAlbumPress={handleAlbumPress}
+                onSeeAllPress={() => setActiveTab('Library')}
+                onAlbumMenuPress={handleAlbumMenu}
+              />
+
+              {/* D. For You */}
+              <PlaylistSection
+                playlists={mockForYou}
+                onPlaylistPress={handlePlaylistPress}
+                onPlayPress={handlePlaylistPress}
+                onMorePress={() => setActiveTab('Search')}
+              />
+
+              {/* E. Your Collections */}
+              <CollectionsSection
+                collections={mockCollections}
+                categories={collectionCategories}
+                onCollectionPress={handleCollectionPress}
+                onMorePress={() => setActiveTab('Library')}
+              />
+
+              {/* Generous bottom spacer ensures Your Collections sits fully above mini-player */}
+              <View style={styles.scrollBottomSpacer} />
+            </ScrollView>
+          ) : (
+            <TabPlaceholder
+              tab={activeTab}
               user={mockUser}
-              onNotificationPress={handleNotificationPress}
-              onSettingsPress={handleSettingsPress}
-              onProfilePress={handleProfilePress}
+              onReturnHome={() => setActiveTab('Home')}
             />
-
-            {/* B. Featured Music Banner */}
-            <FeaturedBanner
-              banners={mockFeaturedBanners}
-              onPlayMix={handlePlayMix}
-            />
-
-            {/* C. Recently Played */}
-            <RecentlyPlayed
-              albums={mockRecentlyPlayed}
-              onAlbumPress={handleAlbumPress}
-              onSeeAllPress={() => showFeedback('Viewing all 38 recently played tracks')}
-              onAlbumMenuPress={handleAlbumMenu}
-            />
-
-            {/* D. For You */}
-            <PlaylistSection
-              playlists={mockForYou}
-              onPlaylistPress={handlePlaylistPress}
-              onPlayPress={handlePlaylistPress}
-              onMorePress={() => showFeedback('Curated mixes refreshed daily')}
-            />
-
-            {/* E. Your Collections */}
-            <CollectionsSection
-              collections={mockCollections}
-              categories={collectionCategories}
-              onCollectionPress={handleCollectionPress}
-              onMorePress={() => showFeedback('Opening full Collections library')}
-            />
-
-            {/* Spacer to prevent mini-player & bottom nav overlap */}
-            <View style={styles.scrollBottomSpacer} />
-          </ScrollView>
-
-          {/* Toast Notification Banner */}
-          {activeToast && (
-            <View style={styles.toastContainer}>
-              <Text style={styles.toastText}>{activeToast}</Text>
-            </View>
           )}
 
-          {/* Fixed Bottom Container: F. Mini-player & G. Bottom Navigation */}
+          {/* Persistent Fixed Bottom Container: F. Mini-player & G. Bottom Navigation */}
           <View style={styles.bottomDock}>
             <MiniPlayer
               track={currentTrack}
@@ -232,7 +250,9 @@ export default function HomeScreen() {
               onTogglePlay={handleTogglePlay}
               onToggleFavorite={handleToggleFavorite}
               onNextTrack={handleNextTrack}
-              onPressTrack={() => showFeedback(`Now Playing details: ${currentTrack.title}`)}
+              onPressTrack={() => {
+                // Focus on current track
+              }}
             />
             <BottomNavigation
               activeTab={activeTab}
@@ -283,6 +303,7 @@ const styles = StyleSheet.create({
   scrollArea: {
     flex: 1,
     width: '100%',
+    minHeight: 0,
     ...Platform.select({
       web: {
         overflowY: 'auto' as any,
@@ -290,10 +311,10 @@ const styles = StyleSheet.create({
     }),
   },
   scrollContent: {
-    paddingBottom: 16,
+    paddingBottom: 20,
   },
   scrollBottomSpacer: {
-    height: 175, // Generous spacer ensures Your Collections is fully visible above floating mini-player
+    height: 180, // Generous 180px spacer guarantees Your Collections cards sit fully above the floating mini-player
   },
   bottomDock: {
     position: 'absolute',
@@ -305,29 +326,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     zIndex: 100,
     paddingTop: 6,
-  },
-  toastContainer: {
-    position: 'absolute',
-    bottom: 148,
-    left: 20,
-    right: 20,
-    backgroundColor: 'rgba(24, 36, 29, 0.94)',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 200,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  toastText: {
-    color: Colors.text.light,
-    fontSize: 12.5,
-    fontWeight: '500',
-    textAlign: 'center',
   },
 });
