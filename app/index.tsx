@@ -28,6 +28,7 @@ import {
   CollectionItem,
   FeaturedBannerItem,
   NavigationTab,
+  Song,
 } from '../types';
 
 // Components
@@ -40,13 +41,14 @@ import {
   MiniPlayer,
   BottomNavigation,
   TabPlaceholder,
+  SearchScreen,
 } from '../components';
 
 export default function HomeScreen() {
   // Navigation & Interactive State
   const [activeTab, setActiveTab] = useState<NavigationTab>('Home');
   const [currentTrack, setCurrentTrack] = useState<Track>(initialTrack);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
 
   // Banner Play Mix action
   const handlePlayMix = (banner: FeaturedBannerItem) => {
@@ -124,6 +126,18 @@ export default function HomeScreen() {
       });
       setIsPlaying(true);
     }
+  };
+
+  // Search song press action
+  const handleSelectSong = (song: Song) => {
+    setCurrentTrack({
+      id: song.id,
+      title: song.title,
+      artist: song.artist,
+      artwork: song.artwork,
+      isFavorite: currentTrack.id === song.id ? currentTrack.isFavorite : false,
+    });
+    setIsPlaying(true);
   };
 
   // Mini player controls
@@ -234,6 +248,12 @@ export default function HomeScreen() {
               {/* Generous bottom spacer ensures Your Collections sits fully above mini-player */}
               <View style={styles.scrollBottomSpacer} />
             </ScrollView>
+          ) : activeTab === 'Search' ? (
+            <SearchScreen
+              user={mockUser}
+              onSelectSong={handleSelectSong}
+              onProfilePress={handleProfilePress}
+            />
           ) : (
             <TabPlaceholder
               tab={activeTab}

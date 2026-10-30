@@ -15,3 +15,10 @@ export { TabPlaceholder } from './home/TabPlaceholder';
 // Player & Navigation Components
 export { MiniPlayer } from './player/MiniPlayer';
 export { BottomNavigation } from './navigation/BottomNavigation';
+
+// Search Components
+export { SearchHeader } from './search/SearchHeader';
+export { RecentSearches } from './search/RecentSearches';
+export { SearchResultItem } from './search/SearchResultItem';
+export { SearchResults } from './search/SearchResults';
+export { SearchScreen } from './search/SearchScreen';
