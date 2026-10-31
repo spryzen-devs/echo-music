@@ -19,11 +19,9 @@ import {
   mockForYou,
   mockCollections,
   collectionCategories,
-  initialTrack,
 } from '../constants/mockData';
 import {
   UserProfile,
-  Track,
   AlbumItem,
   PlaylistItem,
   CollectionItem,
@@ -33,6 +31,9 @@ import {
   LibraryPlaylist,
   LibraryAlbum,
 } from '../types';
+
+// Context
+import { PlaybackProvider, usePlayback } from '../context/PlaybackContext';
 
 // Components
 import {
@@ -47,14 +48,26 @@ import {
   SearchScreen,
   LibraryScreen,
   ProfileScreen,
+  NowPlayingScreen,
 } from '../components';
 
-export default function HomeScreen() {
+function EchoApp() {
   // Navigation & Interactive State
-  const [activeTab, setActiveTab] = useState<NavigationTab>('Profile');
+  const [activeTab, setActiveTab] = useState<NavigationTab>('Home');
   const [user, setUser] = useState<UserProfile>(mockUser);
-  const [currentTrack, setCurrentTrack] = useState<Track>(initialTrack);
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+
+  // Playback Context
+  const {
+    currentTrack,
+    isPlaying,
+    isNowPlayingOpen,
+    playTrack,
+    togglePlay,
+    toggleFavorite,
+    nextTrack,
+    openNowPlaying,
+    closeNowPlaying,
+  } = usePlayback();
 
   // Update Profile details
   const handleUpdateUser = (updated: Partial<UserProfile>) => {
@@ -66,26 +79,28 @@ export default function HomeScreen() {
 
   // Banner Play Mix action
   const handlePlayMix = (banner: FeaturedBannerItem) => {
-    setCurrentTrack({
+    playTrack({
       id: `mix-${banner.id}`,
       title: banner.mixTrackTitle,
       artist: banner.mixArtist,
       artwork: banner.artwork,
+      duration: '3:24',
+      durationSeconds: 204,
       isFavorite: false,
     });
-    setIsPlaying(true);
   };
 
   // Album play action
   const handleAlbumPress = (album: AlbumItem) => {
-    setCurrentTrack({
+    playTrack({
       id: `album-${album.id}`,
       title: album.title,
       artist: album.artist,
       artwork: album.artwork,
+      duration: '3:30',
+      durationSeconds: 210,
       isFavorite: currentTrack.id === `album-${album.id}` ? currentTrack.isFavorite : false,
     });
-    setIsPlaying(true);
   };
 
   const handleAlbumMenu = (album: AlbumItem) => {
@@ -99,119 +114,85 @@ export default function HomeScreen() {
 
   // Playlist play action
   const handlePlaylistPress = (playlist: PlaylistItem) => {
-    setCurrentTrack({
+    playTrack({
       id: `playlist-${playlist.id}`,
       title: playlist.title,
       artist: `Echo ${playlist.subtitle}`,
       artwork: playlist.artwork,
+      duration: '3:15',
+      durationSeconds: 195,
       isFavorite: false,
     });
-    setIsPlaying(true);
   };
 
   // Collection card press action
   const handleCollectionPress = (collection: CollectionItem) => {
-    // If the collection is a playlist like Liked Songs, update playback
     if (collection.id === 'col-liked') {
-      setCurrentTrack({
+      playTrack({
         id: 'track-liked-first',
         title: 'Nikes',
         artist: 'Frank Ocean',
         artwork: require('../assets/images/music/album_blonde.png'),
+        duration: '5:14',
+        durationSeconds: 314,
         isFavorite: true,
       });
-      setIsPlaying(true);
     } else if (collection.id === 'col-top-mix') {
-      setCurrentTrack({
+      playTrack({
         id: 'track-top-mix',
         title: 'EARFQUAKE',
         artist: 'Tyler, The Creator',
         artwork: require('../assets/images/music/album_igor.png'),
+        duration: '3:10',
+        durationSeconds: 190,
         isFavorite: false,
       });
-      setIsPlaying(true);
     } else if (collection.id === 'col-downloaded') {
-      setCurrentTrack({
+      playTrack({
         id: 'track-downloaded',
         title: 'The Less I Know The Better',
         artist: 'Tame Impala',
         artwork: require('../assets/images/music/album_currents.png'),
+        duration: '3:36',
+        durationSeconds: 216,
         isFavorite: false,
       });
-      setIsPlaying(true);
     }
   };
 
   // Search song press action
   const handleSelectSong = (song: Song) => {
-    setCurrentTrack({
-      id: song.id,
-      title: song.title,
-      artist: song.artist,
-      artwork: song.artwork,
-      isFavorite: currentTrack.id === song.id ? currentTrack.isFavorite : false,
-    });
-    setIsPlaying(true);
+    playTrack(song);
   };
 
   // Library playlist selection action
   const handleSelectPlaylist = (playlist: LibraryPlaylist) => {
-    setCurrentTrack({
+    playTrack({
       id: `lib-playlist-${playlist.id}`,
       title: playlist.name,
       artist: `Echo Playlist • ${playlist.songCount} songs`,
       artwork: playlist.artwork,
+      duration: '3:45',
+      durationSeconds: 225,
       isFavorite: playlist.name === 'Favorites',
     });
-    setIsPlaying(true);
   };
 
   // Library album selection action
   const handleSelectAlbum = (album: LibraryAlbum) => {
-    setCurrentTrack({
+    playTrack({
       id: `lib-album-${album.id}`,
       title: album.title,
       artist: `Local Collection • ${album.songCount} songs`,
       artwork: album.artwork,
+      duration: '3:20',
+      durationSeconds: 200,
       isFavorite: false,
     });
-    setIsPlaying(true);
-  };
-
-  // Mini player controls
-  const handleTogglePlay = () => {
-    setIsPlaying((prev) => !prev);
-  };
-
-  const handleToggleFavorite = () => {
-    setCurrentTrack((prev) => ({
-      ...prev,
-      isFavorite: !prev.isFavorite,
-    }));
-  };
-
-  const handleNextTrack = () => {
-    const currentIndex = mockRecentlyPlayed.findIndex(
-      (a) => a.title === currentTrack.title
-    );
-    const nextAlbum =
-      currentIndex >= 0 && currentIndex < mockRecentlyPlayed.length - 1
-        ? mockRecentlyPlayed[currentIndex + 1]
-        : mockRecentlyPlayed[0];
-
-    setCurrentTrack({
-      id: `album-${nextAlbum.id}`,
-      title: nextAlbum.title,
-      artist: nextAlbum.artist,
-      artwork: nextAlbum.artwork,
-      isFavorite: false,
-    });
-    setIsPlaying(true);
   };
 
   // Header button handlers
   const handleNotificationPress = () => {
-    // Informative alert without disruptive toast
     if (Platform.OS === 'web') {
       window.alert('Notifications: No new alerts. Your Echo library is up to date.');
     } else {
@@ -233,7 +214,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-      <StatusBar style="dark" />
+      <StatusBar style={isNowPlayingOpen ? 'light' : 'dark'} />
 
       {/* Main Container - Centered on Web Desktop, Full on Mobile */}
       <View style={styles.outerContainer}>
@@ -319,21 +300,32 @@ export default function HomeScreen() {
             <MiniPlayer
               track={currentTrack}
               isPlaying={isPlaying}
-              onTogglePlay={handleTogglePlay}
-              onToggleFavorite={handleToggleFavorite}
-              onNextTrack={handleNextTrack}
-              onPressTrack={() => {
-                // Focus on current track
-              }}
+              onTogglePlay={togglePlay}
+              onToggleFavorite={toggleFavorite}
+              onNextTrack={nextTrack}
+              onPressTrack={openNowPlaying}
             />
             <BottomNavigation
               activeTab={activeTab}
               onTabChange={handleTabChange}
             />
           </View>
+
+          {/* Phase 2.5: Immersive Full-Screen Now Playing Screen */}
+          {isNowPlayingOpen && (
+            <NowPlayingScreen onClose={closeNowPlaying} />
+          )}
         </View>
       </View>
     </SafeAreaView>
+  );
+}
+
+export default function HomeScreen() {
+  return (
+    <PlaybackProvider>
+      <EchoApp />
+    </PlaybackProvider>
   );
 }
 

@@ -13,7 +13,7 @@ export function searchSongs(query: string, songs: Song[]): Song[] {
   return songs.filter((song) => {
     const titleMatch = song.title.toLowerCase().includes(cleanQuery);
     const artistMatch = song.artist.toLowerCase().includes(cleanQuery);
-    const albumMatch = song.album.toLowerCase().includes(cleanQuery);
+    const albumMatch = song.album ? song.album.toLowerCase().includes(cleanQuery) : false;
     return titleMatch || artistMatch || albumMatch;
   });
 }

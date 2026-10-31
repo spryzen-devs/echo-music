@@ -15,6 +15,16 @@ export { TabPlaceholder } from './home/TabPlaceholder';
 // Player & Navigation Components
 export { MiniPlayer } from './player/MiniPlayer';
 export { BottomNavigation } from './navigation/BottomNavigation';
+export { NowPlayingScreen } from './player/NowPlayingScreen';
+export { NowPlayingHeader } from './player/NowPlayingHeader';
+export { ArtworkCarousel } from './player/ArtworkCarousel';
+export { SongInformation } from './player/SongInformation';
+export { PlaybackProgress } from './player/PlaybackProgress';
+export { PlaybackControls } from './player/PlaybackControls';
+export { QueueList } from './player/QueueList';
+export { LyricsPanel } from './player/LyricsPanel';
+export { RelatedSongs } from './player/RelatedSongs';
+export { PlayerBottomPanel } from './player/PlayerBottomPanel';
 
 // Search Components
 export { SearchHeader } from './search/SearchHeader';
