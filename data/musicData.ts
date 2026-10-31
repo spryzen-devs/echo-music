@@ -292,3 +292,4 @@ export function getAlbumById(id: string): Album | undefined {
 export function getPlaylistById(id: string, customPlaylists: Playlist[] = []): Playlist | undefined {
   return customPlaylists.find((p) => p.id === id) || mockPlaylists.find((p) => p.id === id);
 }
+

@@ -59,3 +59,4 @@ export interface Track {
 export type NavigationTab = 'Home' | 'Search' | 'Library' | 'Profile';
 
 export * from './music';
+export * from './database';
