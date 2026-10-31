@@ -15,3 +15,18 @@ export interface RecentSearchItem {
   query: string;
 }
 
+export interface LibraryPlaylist {
+  id: string;
+  name: string;
+  songCount: number;
+  artwork: ImageSourcePropType;
+}
+
+export interface LibraryAlbum {
+  id: string;
+  title: string;
+  songCount: number;
+  artwork: ImageSourcePropType;
+}
+
+

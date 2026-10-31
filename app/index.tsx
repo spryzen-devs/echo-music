@@ -29,6 +29,8 @@ import {
   FeaturedBannerItem,
   NavigationTab,
   Song,
+  LibraryPlaylist,
+  LibraryAlbum,
 } from '../types';
 
 // Components
@@ -42,6 +44,7 @@ import {
   BottomNavigation,
   TabPlaceholder,
   SearchScreen,
+  LibraryScreen,
 } from '../components';
 
 export default function HomeScreen() {
@@ -136,6 +139,30 @@ export default function HomeScreen() {
       artist: song.artist,
       artwork: song.artwork,
       isFavorite: currentTrack.id === song.id ? currentTrack.isFavorite : false,
+    });
+    setIsPlaying(true);
+  };
+
+  // Library playlist selection action
+  const handleSelectPlaylist = (playlist: LibraryPlaylist) => {
+    setCurrentTrack({
+      id: `lib-playlist-${playlist.id}`,
+      title: playlist.name,
+      artist: `Echo Playlist • ${playlist.songCount} songs`,
+      artwork: playlist.artwork,
+      isFavorite: playlist.name === 'Favorites',
+    });
+    setIsPlaying(true);
+  };
+
+  // Library album selection action
+  const handleSelectAlbum = (album: LibraryAlbum) => {
+    setCurrentTrack({
+      id: `lib-album-${album.id}`,
+      title: album.title,
+      artist: `Local Collection • ${album.songCount} songs`,
+      artwork: album.artwork,
+      isFavorite: false,
     });
     setIsPlaying(true);
   };
@@ -252,6 +279,13 @@ export default function HomeScreen() {
             <SearchScreen
               user={mockUser}
               onSelectSong={handleSelectSong}
+              onProfilePress={handleProfilePress}
+            />
+          ) : activeTab === 'Library' ? (
+            <LibraryScreen
+              user={mockUser}
+              onSelectPlaylist={handleSelectPlaylist}
+              onSelectAlbum={handleSelectAlbum}
               onProfilePress={handleProfilePress}
             />
           ) : (
