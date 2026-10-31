@@ -5,7 +5,6 @@ import {
   ScrollView,
   Image,
   Platform,
-  Alert,
 } from 'react-native';
 import { usePlayback } from '../../context/PlaybackContext';
 import { mockSongs } from '../../data/mockSongs';
@@ -39,6 +38,7 @@ export const NowPlayingScreen: React.FC<NowPlayingScreenProps> = ({ onClose }) =
     toggleShuffle,
     cycleRepeat,
     closeNowPlaying,
+    openOptionsModal,
     formatTime,
   } = usePlayback();
 
@@ -51,21 +51,11 @@ export const NowPlayingScreen: React.FC<NowPlayingScreenProps> = ({ onClose }) =
   };
 
   const handleMoreOptions = () => {
-    const msg = `Options for "${currentTrack.title}" by ${currentTrack.artist}\n• Add to Playlist\n• View Artist\n• Share Song\n• Sleep Timer`;
-    if (Platform.OS === 'web') {
-      window.alert(msg);
-    } else {
-      Alert.alert(currentTrack.title, msg);
-    }
+    openOptionsModal(currentTrack);
   };
 
   const handleQueueTrackOptions = (song: Song) => {
-    const msg = `Options for "${song.title}"\n• Play Next\n• Remove from Queue\n• Add to Playlist`;
-    if (Platform.OS === 'web') {
-      window.alert(msg);
-    } else {
-      Alert.alert(song.title, msg);
-    }
+    openOptionsModal(song);
   };
 
   return (

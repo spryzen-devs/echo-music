@@ -5,11 +5,31 @@ export interface Song {
   title: string;
   artist: string;
   album?: string;
-  artwork: ImageSourcePropType;
-  duration?: string;
+  duration: string;
   durationSeconds?: number;
+  artwork: ImageSourcePropType;
+  audioUrl?: string; // Optional for future audio streaming
   isFavorite?: boolean;
   lyrics?: string[];
+}
+
+export interface Album {
+  id: string;
+  title: string;
+  artist: string;
+  artwork: ImageSourcePropType;
+  songIds: string[];
+  songCount?: number;
+}
+
+export interface Playlist {
+  id: string;
+  name: string;
+  description: string;
+  artwork: ImageSourcePropType;
+  songIds: string[];
+  songCount?: number;
+  isUserCreated?: boolean;
 }
 
 export type RepeatMode = 'off' | 'all' | 'one';
@@ -20,18 +40,6 @@ export interface RecentSearchItem {
   query: string;
 }
 
-export interface LibraryPlaylist {
-  id: string;
-  name: string;
-  songCount: number;
-  artwork: ImageSourcePropType;
-}
-
-export interface LibraryAlbum {
-  id: string;
-  title: string;
-  songCount: number;
-  artwork: ImageSourcePropType;
-}
-
-
+// Backward compatibility aliases
+export type LibraryPlaylist = Playlist;
+export type LibraryAlbum = Album;

@@ -13,7 +13,6 @@ import { StatusBar } from 'expo-status-bar';
 import { Colors } from '../constants/colors';
 import { Layout } from '../constants/spacing';
 import {
-  mockUser,
   mockFeaturedBanners,
   mockRecentlyPlayed,
   mockForYou,
@@ -21,7 +20,6 @@ import {
   collectionCategories,
 } from '../constants/mockData';
 import {
-  UserProfile,
   AlbumItem,
   PlaylistItem,
   CollectionItem,
@@ -31,6 +29,7 @@ import {
   LibraryPlaylist,
   LibraryAlbum,
 } from '../types';
+import { mockSongs, mockAlbums } from '../data/musicData';
 
 // Context
 import { PlaybackProvider, usePlayback } from '../context/PlaybackContext';
@@ -49,33 +48,50 @@ import {
   LibraryScreen,
   ProfileScreen,
   NowPlayingScreen,
+  SongOptionsModal,
+  CreatePlaylistModal,
+  PlaylistDetailModal,
+  AlbumDetailModal,
 } from '../components';
 
 function EchoApp() {
-  // Navigation & Interactive State
+  // Navigation State
   const [activeTab, setActiveTab] = useState<NavigationTab>('Home');
-  const [user, setUser] = useState<UserProfile>(mockUser);
 
-  // Playback Context
+  // Playback & Global Application Context
   const {
     currentTrack,
     isPlaying,
     isNowPlayingOpen,
+    likedSongIds,
+    playlists,
+    userProfile,
+    isOptionsModalOpen,
+    activeSongForOptions,
+    isCreatePlaylistOpen,
+    selectedPlaylistForView,
+    selectedAlbumForView,
     playTrack,
-    togglePlay,
+    playPlaylist,
+    playAlbum,
+    togglePlayPause,
     toggleFavorite,
     nextTrack,
     openNowPlaying,
     closeNowPlaying,
+    openOptionsModal,
+    closeOptionsModal,
+    closeCreatePlaylist,
+    createPlaylist,
+    addSongToPlaylist,
+    openPlaylistView,
+    closePlaylistView,
+    openAlbumView,
+    closeAlbumView,
+    playNextInQueue,
+    addToQueue,
+    updateUserProfile,
   } = usePlayback();
-
-  // Update Profile details
-  const handleUpdateUser = (updated: Partial<UserProfile>) => {
-    setUser((prev) => ({
-      ...prev,
-      ...updated,
-    }));
-  };
 
   // Banner Play Mix action
   const handlePlayMix = (banner: FeaturedBannerItem) => {
@@ -83,6 +99,7 @@ function EchoApp() {
       id: `mix-${banner.id}`,
       title: banner.mixTrackTitle,
       artist: banner.mixArtist,
+      album: 'Echo Featured Mix',
       artwork: banner.artwork,
       duration: '3:24',
       durationSeconds: 204,
@@ -90,108 +107,105 @@ function EchoApp() {
     });
   };
 
-  // Album play action
+  // Album card press action on Home screen
   const handleAlbumPress = (album: AlbumItem) => {
-    playTrack({
-      id: `album-${album.id}`,
-      title: album.title,
-      artist: album.artist,
-      artwork: album.artwork,
-      duration: '3:30',
-      durationSeconds: 210,
-      isFavorite: currentTrack.id === `album-${album.id}` ? currentTrack.isFavorite : false,
-    });
-  };
-
-  const handleAlbumMenu = (album: AlbumItem) => {
-    const msg = `Options for "${album.title}" by ${album.artist}`;
-    if (Platform.OS === 'web') {
-      window.alert(msg);
+    const matchedAlbum = mockAlbums.find(
+      (a) => a.id === album.id || a.title.toLowerCase() === album.title.toLowerCase()
+    );
+    if (matchedAlbum) {
+      openAlbumView(matchedAlbum);
     } else {
-      Alert.alert(album.title, msg);
+      playTrack({
+        id: `album-${album.id}`,
+        title: album.title,
+        artist: album.artist,
+        album: album.title,
+        artwork: album.artwork,
+        duration: '3:30',
+        durationSeconds: 210,
+        isFavorite: false,
+      });
     }
   };
 
-  // Playlist play action
-  const handlePlaylistPress = (playlist: PlaylistItem) => {
-    playTrack({
-      id: `playlist-${playlist.id}`,
-      title: playlist.title,
-      artist: `Echo ${playlist.subtitle}`,
-      artwork: playlist.artwork,
-      duration: '3:15',
-      durationSeconds: 195,
-      isFavorite: false,
-    });
+  // Three-dot menu on Home Recently Played albums
+  const handleAlbumMenu = (album: AlbumItem) => {
+    const matchedSong = mockSongs.find(
+      (s) =>
+        s.album?.toLowerCase() === album.title.toLowerCase() ||
+        s.artist.toLowerCase() === album.artist.toLowerCase()
+    );
+    if (matchedSong) {
+      openOptionsModal(matchedSong);
+    } else {
+      openOptionsModal({
+        id: `song-${album.id}`,
+        title: album.title,
+        artist: album.artist,
+        album: album.title,
+        artwork: album.artwork,
+        duration: '3:30',
+        durationSeconds: 210,
+      });
+    }
   };
 
-  // Collection card press action
+  // Playlist card press action on Home screen
+  const handlePlaylistPress = (playlist: PlaylistItem) => {
+    const matchedPlaylist = playlists.find(
+      (p) => p.name.toLowerCase() === playlist.title.toLowerCase()
+    );
+    if (matchedPlaylist) {
+      openPlaylistView(matchedPlaylist);
+    } else {
+      playTrack({
+        id: `playlist-${playlist.id}`,
+        title: playlist.title,
+        artist: `Echo ${playlist.subtitle}`,
+        album: playlist.title,
+        artwork: playlist.artwork,
+        duration: '3:15',
+        durationSeconds: 195,
+        isFavorite: false,
+      });
+    }
+  };
+
+  // Collection card press action on Home screen
   const handleCollectionPress = (collection: CollectionItem) => {
     if (collection.id === 'col-liked') {
-      playTrack({
-        id: 'track-liked-first',
-        title: 'Nikes',
-        artist: 'Frank Ocean',
-        artwork: require('../assets/images/music/album_blonde.png'),
-        duration: '5:14',
-        durationSeconds: 314,
-        isFavorite: true,
-      });
+      const favPlaylist =
+        playlists.find((p) => p.id === 'playlist-favorites') || playlists[0];
+      openPlaylistView(favPlaylist);
     } else if (collection.id === 'col-top-mix') {
-      playTrack({
-        id: 'track-top-mix',
-        title: 'EARFQUAKE',
-        artist: 'Tyler, The Creator',
-        artwork: require('../assets/images/music/album_igor.png'),
-        duration: '3:10',
-        durationSeconds: 190,
-        isFavorite: false,
-      });
+      const igorAlbum = mockAlbums.find((a) => a.id === 'album-igor');
+      if (igorAlbum) openAlbumView(igorAlbum);
     } else if (collection.id === 'col-downloaded') {
-      playTrack({
-        id: 'track-downloaded',
-        title: 'The Less I Know The Better',
-        artist: 'Tame Impala',
-        artwork: require('../assets/images/music/album_currents.png'),
-        duration: '3:36',
-        durationSeconds: 216,
-        isFavorite: false,
-      });
+      const currentsAlbum = mockAlbums.find((a) => a.id === 'album-currents');
+      if (currentsAlbum) openAlbumView(currentsAlbum);
+    } else if (collection.id === 'col-chill') {
+      const chillPlaylist =
+        playlists.find((p) => p.id === 'playlist-chill') || playlists[1];
+      openPlaylistView(chillPlaylist);
     }
   };
 
-  // Search song press action
+  // Song selection from Search, Library, or Profile
   const handleSelectSong = (song: Song) => {
     playTrack(song);
   };
 
-  // Library playlist selection action
+  // Library playlist selection
   const handleSelectPlaylist = (playlist: LibraryPlaylist) => {
-    playTrack({
-      id: `lib-playlist-${playlist.id}`,
-      title: playlist.name,
-      artist: `Echo Playlist • ${playlist.songCount} songs`,
-      artwork: playlist.artwork,
-      duration: '3:45',
-      durationSeconds: 225,
-      isFavorite: playlist.name === 'Favorites',
-    });
+    openPlaylistView(playlist);
   };
 
-  // Library album selection action
+  // Library album selection
   const handleSelectAlbum = (album: LibraryAlbum) => {
-    playTrack({
-      id: `lib-album-${album.id}`,
-      title: album.title,
-      artist: `Local Collection • ${album.songCount} songs`,
-      artwork: album.artwork,
-      duration: '3:20',
-      durationSeconds: 200,
-      isFavorite: false,
-    });
+    openAlbumView(album);
   };
 
-  // Header button handlers
+  // Notifications button handler
   const handleNotificationPress = () => {
     if (Platform.OS === 'web') {
       window.alert('Notifications: No new alerts. Your Echo library is up to date.');
@@ -228,7 +242,7 @@ function EchoApp() {
             >
               {/* A. Header */}
               <HomeHeader
-                user={user}
+                user={userProfile}
                 onNotificationPress={handleNotificationPress}
                 onSettingsPress={handleSettingsPress}
                 onProfilePress={handleProfilePress}
@@ -269,39 +283,39 @@ function EchoApp() {
             </ScrollView>
           ) : activeTab === 'Search' ? (
             <SearchScreen
-              user={user}
+              user={userProfile}
               onSelectSong={handleSelectSong}
               onProfilePress={handleProfilePress}
             />
           ) : activeTab === 'Library' ? (
             <LibraryScreen
-              user={user}
+              user={userProfile}
               onSelectPlaylist={handleSelectPlaylist}
               onSelectAlbum={handleSelectAlbum}
               onProfilePress={handleProfilePress}
             />
           ) : activeTab === 'Profile' ? (
             <ProfileScreen
-              user={user}
-              onUpdateUser={handleUpdateUser}
+              user={userProfile}
+              onUpdateUser={updateUserProfile}
               onSelectSong={handleSelectSong}
               onSelectAlbum={handleAlbumPress}
             />
           ) : (
             <TabPlaceholder
               tab={activeTab}
-              user={user}
+              user={userProfile}
               onReturnHome={() => setActiveTab('Home')}
             />
           )}
 
-          {/* Persistent Fixed Bottom Container: F. Mini-player & G. Bottom Navigation */}
+          {/* Persistent Fixed Bottom Container: Mini-player & Bottom Navigation */}
           <View style={styles.bottomDock}>
             <MiniPlayer
               track={currentTrack}
               isPlaying={isPlaying}
-              onTogglePlay={togglePlay}
-              onToggleFavorite={toggleFavorite}
+              onTogglePlay={togglePlayPause}
+              onToggleFavorite={() => toggleFavorite(currentTrack.id)}
               onNextTrack={nextTrack}
               onPressTrack={openNowPlaying}
             />
@@ -315,6 +329,50 @@ function EchoApp() {
           {isNowPlayingOpen && (
             <NowPlayingScreen onClose={closeNowPlaying} />
           )}
+
+          {/* Phase 3: Comprehensive Song Options 3-Dots Modal */}
+          <SongOptionsModal
+            visible={isOptionsModalOpen}
+            song={activeSongForOptions}
+            isLiked={activeSongForOptions ? likedSongIds.includes(activeSongForOptions.id) : false}
+            playlists={playlists}
+            onClose={closeOptionsModal}
+            onPlayNext={playNextInQueue}
+            onAddToQueue={addToQueue}
+            onToggleFavorite={(songId) => toggleFavorite(songId)}
+            onAddToPlaylist={(playlistId, songId) => addSongToPlaylist(playlistId, songId)}
+            onOpenAlbum={(albumId) => {
+              const matched = mockAlbums.find((a) => a.id === albumId);
+              if (matched) openAlbumView(matched);
+            }}
+          />
+
+          {/* Phase 3: Create Playlist Modal */}
+          <CreatePlaylistModal
+            visible={isCreatePlaylistOpen}
+            onClose={closeCreatePlaylist}
+            onCreate={(name, desc) => createPlaylist(name, desc)}
+          />
+
+          {/* Phase 3: Playlist Detail Modal */}
+          <PlaylistDetailModal
+            visible={!!selectedPlaylistForView}
+            playlist={selectedPlaylistForView}
+            onClose={closePlaylistView}
+            onPlaySong={handleSelectSong}
+            onPlayAll={playPlaylist}
+            onSongOptions={openOptionsModal}
+          />
+
+          {/* Phase 3: Album Detail Modal */}
+          <AlbumDetailModal
+            visible={!!selectedAlbumForView}
+            album={selectedAlbumForView}
+            onClose={closeAlbumView}
+            onPlaySong={handleSelectSong}
+            onPlayAlbum={playAlbum}
+            onSongOptions={openOptionsModal}
+          />
         </View>
       </View>
     </SafeAreaView>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   StyleSheet,
@@ -9,16 +9,17 @@ import {
 } from 'react-native';
 import { UserProfile } from '../../types';
 import { LibraryPlaylist, LibraryAlbum } from '../../types/music';
-import { mockLibraryPlaylists, mockLibraryAlbums } from '../../data/mockLibrary';
+import { mockAlbums } from '../../data/musicData';
 import { Colors } from '../../constants/colors';
+import { usePlayback } from '../../context/PlaybackContext';
 import { LibraryHero } from './LibraryHero';
 import { PlaylistSection } from './PlaylistSection';
 import { AlbumSection } from './AlbumSection';
 
 interface LibraryScreenProps {
   user: UserProfile;
-  onSelectPlaylist: (playlist: LibraryPlaylist) => void;
-  onSelectAlbum: (album: LibraryAlbum) => void;
+  onSelectPlaylist?: (playlist: LibraryPlaylist) => void;
+  onSelectAlbum?: (album: LibraryAlbum) => void;
   onProfilePress?: () => void;
 }
 
@@ -28,8 +29,14 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   onSelectAlbum,
   onProfilePress,
 }) => {
-  const [playlists, setPlaylists] = useState<LibraryPlaylist[]>(mockLibraryPlaylists);
-  const [albums] = useState<LibraryAlbum[]>(mockLibraryAlbums);
+  const {
+    playlists,
+    openCreatePlaylist,
+    openPlaylistView,
+    openAlbumView,
+    playPlaylist,
+    playAlbum,
+  } = usePlayback();
 
   // Cloud Music Access interaction
   const handleCloudPress = () => {
@@ -45,41 +52,33 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
 
   // Create Playlist interaction
   const handleCreatePlaylist = () => {
-    const newName = `New Mix #${playlists.length + 1}`;
-    const newPlaylist: LibraryPlaylist = {
-      id: `playlist-custom-${Date.now()}`,
-      name: newName,
-      songCount: 0,
-      artwork: require('../../assets/images/music/library/playlist_chill.png'),
-    };
-    setPlaylists((prev) => [...prev, newPlaylist]);
+    openCreatePlaylist();
+  };
 
-    const msg = `Created "${newName}". You can now add tracks to this playlist.`;
-    if (Platform.OS === 'web') {
-      window.alert(msg);
-    } else {
-      Alert.alert('Playlist Created', msg);
+  // Playlist selection opens playlist detail modal
+  const handleSelectPlaylist = (playlist: LibraryPlaylist) => {
+    if (onSelectPlaylist) {
+      onSelectPlaylist(playlist);
     }
+    openPlaylistView(playlist);
+  };
+
+  // Album selection opens album detail modal
+  const handleSelectAlbum = (album: LibraryAlbum) => {
+    if (onSelectAlbum) {
+      onSelectAlbum(album);
+    }
+    openAlbumView(album);
   };
 
   // Contextual menu for playlists
   const handlePlaylistMenu = (playlist: LibraryPlaylist) => {
-    const msg = `Options for "${playlist.name}" (${playlist.songCount} songs):\n• Play all\n• Add to queue\n• Rename playlist`;
-    if (Platform.OS === 'web') {
-      window.alert(msg);
-    } else {
-      Alert.alert(playlist.name, msg);
-    }
+    playPlaylist(playlist);
   };
 
   // Contextual menu for albums
   const handleAlbumMenu = (album: LibraryAlbum) => {
-    const msg = `Options for "${album.title}" (${album.songCount} songs):\n• Play album\n• Add to queue\n• View album info`;
-    if (Platform.OS === 'web') {
-      window.alert(msg);
-    } else {
-      Alert.alert(album.title, msg);
-    }
+    playAlbum(album);
   };
 
   return (
@@ -108,15 +107,15 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
         {/* Playlists Section with + Button */}
         <PlaylistSection
           playlists={playlists}
-          onSelectPlaylist={onSelectPlaylist}
+          onSelectPlaylist={handleSelectPlaylist}
           onMenuPress={handlePlaylistMenu}
           onCreatePlaylist={handleCreatePlaylist}
         />
 
         {/* Albums Section */}
         <AlbumSection
-          albums={albums}
-          onSelectAlbum={onSelectAlbum}
+          albums={mockAlbums}
+          onSelectAlbum={handleSelectAlbum}
           onMenuPress={handleAlbumMenu}
         />
 
@@ -141,7 +140,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
-    flexGrow: 1,
   },
   sheetContainer: {
     backgroundColor: Colors.background,
@@ -167,4 +165,3 @@ const styles = StyleSheet.create({
 });
 
 export default LibraryScreen;
-

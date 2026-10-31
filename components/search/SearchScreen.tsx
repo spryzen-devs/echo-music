@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,8 +8,10 @@ import {
 } from 'react-native';
 import { UserProfile } from '../../types';
 import { Song } from '../../types/music';
-import { mockSongs, initialRecentSearches } from '../../data/mockSongs';
+import { mockSongs, initialRecentSearches } from '../../data/musicData';
 import { searchSongs } from '../../services/searchService';
+import { StorageService } from '../../services/storageService';
+import { usePlayback } from '../../context/PlaybackContext';
 import { Colors } from '../../constants/colors';
 import { SearchHeader } from './SearchHeader';
 import { RecentSearches } from './RecentSearches';
@@ -28,6 +30,18 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
 }) => {
   const [query, setQuery] = useState<string>('');
   const [recentSearches, setRecentSearches] = useState<string[]>(initialRecentSearches);
+  const { openOptionsModal } = usePlayback();
+
+  // Load persisted recent searches on mount
+  useEffect(() => {
+    async function loadRecent() {
+      const persisted = await StorageService.getRecentSearches();
+      if (persisted && persisted.length > 0) {
+        setRecentSearches(persisted);
+      }
+    }
+    loadRecent();
+  }, []);
 
   // Client-side filtering matching song title, artist, or album
   const filteredSongs = useMemo(() => {
@@ -58,13 +72,16 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
       const filtered = prev.filter(
         (item) => item.toLowerCase() !== trimmed.toLowerCase()
       );
-      return [trimmed, ...filtered].slice(0, 8); // Keep top 8 searches
+      const updated = [trimmed, ...filtered].slice(0, 8);
+      StorageService.saveRecentSearches(updated);
+      return updated;
     });
   };
 
   // Clear all recent searches
   const handleClearAllSearches = () => {
     setRecentSearches([]);
+    StorageService.saveRecentSearches([]);
   };
 
   // Microphone interaction placeholder
@@ -77,14 +94,9 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
     }
   };
 
-  // Three-dot menu options
+  // Three-dot menu opens the shared interactive options modal
   const handleMenuPress = (song: Song) => {
-    const message = `Options for "${song.title}" by ${song.artist} (${song.album})`;
-    if (Platform.OS === 'web') {
-      window.alert(message);
-    } else {
-      Alert.alert(song.title, message);
-    }
+    openOptionsModal(song);
   };
 
   return (
@@ -122,7 +134,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
           onMenuPress={handleMenuPress}
         />
 
-        {/* Bottom spacer ensures all items scroll well above persistent mini-player */}
+        {/* Bottom spacer so results scroll completely above floating MiniPlayer */}
         <View style={styles.bottomSpacer} />
       </View>
     </ScrollView>
@@ -132,8 +144,6 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
 const styles = StyleSheet.create({
   scrollArea: {
     flex: 1,
-    width: '100%',
-    minHeight: 0,
     backgroundColor: Colors.background,
     ...Platform.select({
       web: {
@@ -143,20 +153,20 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
-    flexGrow: 1,
   },
   sheetContainer: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: -16, // Seamless overlap onto hero background as shown in reference
     flex: 1,
-    minHeight: 500,
+    backgroundColor: Colors.background,
+    marginTop: -28,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingTop: 24,
+    paddingHorizontal: 0,
+    zIndex: 10,
   },
   bottomSpacer: {
-    height: 180, // Clearance above floating mini-player & bottom nav dock
+    height: 180,
   },
 });
 
 export default SearchScreen;
-

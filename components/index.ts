@@ -41,6 +41,12 @@ export { PlaylistSection as LibraryPlaylistSection } from './library/PlaylistSec
 export { AlbumRow } from './library/AlbumRow';
 export { AlbumSection } from './library/AlbumSection';
 export { LibraryScreen } from './library/LibraryScreen';
+export { CreatePlaylistModal } from './library/CreatePlaylistModal';
+export { PlaylistDetailModal } from './library/PlaylistDetailModal';
+export { AlbumDetailModal } from './library/AlbumDetailModal';
+
+// Common Modals
+export { SongOptionsModal } from './common/SongOptionsModal';
 
 // Profile Components
 export { ProfileHero } from './profile/ProfileHero';

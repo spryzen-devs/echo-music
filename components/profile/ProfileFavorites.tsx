@@ -10,12 +10,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Song } from '../../types/music';
 import { AlbumItem } from '../../types';
-import { mockSongs } from '../../data/mockSongs';
+import { mockSongs } from '../../data/musicData';
 import { mockRecentlyPlayed } from '../../constants/mockData';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Spacing, Radius } from '../../constants/spacing';
 import { Shadows } from '../../constants/theme';
+import { usePlayback } from '../../context/PlaybackContext';
 
 interface ProfileFavoritesProps {
   onSelectSong: (song: Song) => void;
@@ -26,8 +27,10 @@ export const ProfileFavorites: React.FC<ProfileFavoritesProps> = ({
   onSelectSong,
   onSelectAlbum,
 }) => {
-  // Favorite songs filtered from mock catalog
-  const favoriteSongs = mockSongs.slice(0, 3);
+  const { likedSongIds, openOptionsModal } = usePlayback();
+
+  // Actual liked songs filtered dynamically from shared state
+  const favoriteSongs = mockSongs.filter((song) => likedSongIds.includes(song.id));
   const favoriteAlbums = mockRecentlyPlayed.slice(0, 2);
   const favoriteArtists = [
     { name: 'Frank Ocean', genre: 'R&B / Soul', tracks: '24 saved' },
@@ -45,29 +48,50 @@ export const ProfileFavorites: React.FC<ProfileFavoritesProps> = ({
         </View>
 
         <View style={styles.listContainer}>
-          {favoriteSongs.map((song, index) => (
-            <Pressable
-              key={song.id}
-              accessibilityRole="button"
-              accessibilityLabel={`Play ${song.title} by ${song.artist}`}
-              style={({ pressed }) => [
-                styles.songRow,
-                pressed && styles.rowPressed,
-              ]}
-              onPress={() => onSelectSong(song)}
-            >
-              <Image source={song.artwork} style={styles.songArtwork} resizeMode="cover" />
-              <View style={styles.songInfo}>
-                <Text style={styles.songTitle} numberOfLines={1}>
-                  {song.title}
-                </Text>
-                <Text style={styles.songSubtitle} numberOfLines={1}>
-                  {song.artist} • {song.album}
-                </Text>
+          {favoriteSongs.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="heart-outline" size={32} color="#A0998B" />
+              <Text style={styles.emptyTitle}>No favorite songs yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Tap the heart icon on any track in Now Playing or the MiniPlayer to save it here.
+              </Text>
+            </View>
+          ) : (
+            favoriteSongs.map((song) => (
+              <View key={song.id} style={styles.songRowWrapper}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Play ${song.title} by ${song.artist}`}
+                  style={({ pressed }) => [
+                    styles.songRow,
+                    pressed && styles.rowPressed,
+                  ]}
+                  onPress={() => onSelectSong(song)}
+                >
+                  <Image source={song.artwork} style={styles.songArtwork} resizeMode="cover" />
+                  <View style={styles.songInfo}>
+                    <Text style={styles.songTitle} numberOfLines={1}>
+                      {song.title}
+                    </Text>
+                    <Text style={styles.songSubtitle} numberOfLines={1}>
+                      {song.artist} {song.album ? `• ${song.album}` : ''}
+                    </Text>
+                  </View>
+                  <Ionicons name="heart" size={18} color="#D9534F" style={styles.heartIcon} />
+                </Pressable>
+
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Options for ${song.title}`}
+                  hitSlop={8}
+                  style={styles.optionsButton}
+                  onPress={() => openOptionsModal(song)}
+                >
+                  <Ionicons name="ellipsis-vertical" size={16} color="#A0998B" />
+                </Pressable>
               </View>
-              <Ionicons name="heart" size={18} color="#D9534F" style={styles.heartIcon} />
-            </Pressable>
-          ))}
+            ))
+          )}
         </View>
       </View>
 
@@ -110,7 +134,7 @@ export const ProfileFavorites: React.FC<ProfileFavoritesProps> = ({
         </View>
 
         <View style={styles.artistsList}>
-          {favoriteArtists.map((artist, index) => (
+          {favoriteArtists.map((artist) => (
             <View key={artist.name} style={styles.artistRow}>
               <View style={styles.artistAvatar}>
                 <Ionicons name="person" size={16} color={Colors.forest.primary} />
@@ -130,105 +154,111 @@ export const ProfileFavorites: React.FC<ProfileFavoritesProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
     paddingHorizontal: Spacing.screenPadding,
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   section: {
-    marginBottom: 22,
+    marginBottom: 28,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   sectionTitle: {
     ...Typography.sectionTitle,
     fontSize: 18,
-    lineHeight: 22,
     color: Colors.text.primary,
   },
   sectionCount: {
-    ...Typography.cardSubtitle,
+    ...Typography.bodySmall,
     fontSize: 12,
     color: Colors.text.secondary,
   },
   listContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+    backgroundColor: '#FAF7F0',
     borderRadius: Radius.lg,
-    overflow: 'hidden',
+    paddingVertical: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.85)',
+    borderColor: 'rgba(160, 150, 130, 0.15)',
+  },
+  songRowWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: 6,
   },
   songRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E6E0D4',
     ...Platform.select({
-      web: {
-        cursor: 'pointer',
-      } as any,
+      web: { cursor: 'pointer' } as any,
     }),
+  },
+  rowPressed: {
+    opacity: 0.7,
   },
   songArtwork: {
     width: 44,
     height: 44,
     borderRadius: Radius.sm,
-    backgroundColor: Colors.surfaceHover,
+    backgroundColor: '#E8E2D6',
   },
   songInfo: {
     flex: 1,
     marginLeft: 12,
-    justifyContent: 'center',
+    paddingRight: 8,
   },
   songTitle: {
     ...Typography.cardTitle,
-    fontSize: 13.5,
-    lineHeight: 18,
+    fontSize: 14,
     color: Colors.text.primary,
-    fontWeight: '600',
   },
   songSubtitle: {
     ...Typography.cardSubtitle,
-    fontSize: 11.5,
-    lineHeight: 15,
+    fontSize: 12,
     color: Colors.text.secondary,
     marginTop: 2,
   },
   heartIcon: {
-    paddingLeft: 8,
+    marginRight: 6,
+  },
+  optionsButton: {
+    padding: 10,
+    ...Platform.select({
+      web: { cursor: 'pointer' } as any,
+    }),
   },
   albumsGrid: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 14,
   },
   albumCard: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+    backgroundColor: '#FAF7F0',
     borderRadius: Radius.md,
     padding: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.85)',
+    borderColor: 'rgba(160, 150, 130, 0.15)',
     ...Platform.select({
-      web: {
-        cursor: 'pointer',
-      } as any,
+      web: { cursor: 'pointer' } as any,
     }),
   },
   albumArtwork: {
     width: '100%',
     aspectRatio: 1,
     borderRadius: Radius.sm,
+    backgroundColor: '#E8E2D6',
     marginBottom: 8,
-    backgroundColor: Colors.surfaceHover,
   },
   albumTitle: {
     ...Typography.cardTitle,
     fontSize: 13,
-    fontWeight: '600',
     color: Colors.text.primary,
   },
   albumArtist: {
@@ -238,35 +268,33 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   artistsList: {
-    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+    backgroundColor: '#FAF7F0',
     borderRadius: Radius.lg,
-    paddingHorizontal: 12,
+    paddingVertical: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.85)',
+    borderColor: 'rgba(160, 150, 130, 0.15)',
   },
   artistRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E6E0D4',
+    paddingHorizontal: 12,
   },
   artistAvatar: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#DFE7E1',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(45, 71, 57, 0.1)',
     alignItems: 'center',
-    marginRight: 12,
+    justifyContent: 'center',
   },
   artistInfo: {
     flex: 1,
+    marginLeft: 12,
   },
   artistName: {
     ...Typography.cardTitle,
-    fontSize: 13.5,
-    fontWeight: '600',
+    fontSize: 14,
     color: Colors.text.primary,
   },
   artistGenre: {
@@ -276,14 +304,29 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   artistTracks: {
-    ...Typography.cardSubtitle,
     fontSize: 11,
-    color: Colors.text.muted,
+    color: Colors.text.secondary,
+    fontWeight: '500',
   },
-  rowPressed: {
-    opacity: 0.75,
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 20,
+    gap: 6,
+  },
+  emptyTitle: {
+    ...Typography.cardTitle,
+    fontSize: 15,
+    color: Colors.text.primary,
+    marginTop: 4,
+  },
+  emptySubtitle: {
+    fontSize: 12,
+    color: Colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 16,
+    maxWidth: 240,
   },
 });
 
 export default ProfileFavorites;
-
