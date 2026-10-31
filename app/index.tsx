@@ -22,6 +22,7 @@ import {
   initialTrack,
 } from '../constants/mockData';
 import {
+  UserProfile,
   Track,
   AlbumItem,
   PlaylistItem,
@@ -45,13 +46,23 @@ import {
   TabPlaceholder,
   SearchScreen,
   LibraryScreen,
+  ProfileScreen,
 } from '../components';
 
 export default function HomeScreen() {
   // Navigation & Interactive State
-  const [activeTab, setActiveTab] = useState<NavigationTab>('Home');
+  const [activeTab, setActiveTab] = useState<NavigationTab>('Profile');
+  const [user, setUser] = useState<UserProfile>(mockUser);
   const [currentTrack, setCurrentTrack] = useState<Track>(initialTrack);
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
+
+  // Update Profile details
+  const handleUpdateUser = (updated: Partial<UserProfile>) => {
+    setUser((prev) => ({
+      ...prev,
+      ...updated,
+    }));
+  };
 
   // Banner Play Mix action
   const handlePlayMix = (banner: FeaturedBannerItem) => {
@@ -236,7 +247,7 @@ export default function HomeScreen() {
             >
               {/* A. Header */}
               <HomeHeader
-                user={mockUser}
+                user={user}
                 onNotificationPress={handleNotificationPress}
                 onSettingsPress={handleSettingsPress}
                 onProfilePress={handleProfilePress}
@@ -277,21 +288,28 @@ export default function HomeScreen() {
             </ScrollView>
           ) : activeTab === 'Search' ? (
             <SearchScreen
-              user={mockUser}
+              user={user}
               onSelectSong={handleSelectSong}
               onProfilePress={handleProfilePress}
             />
           ) : activeTab === 'Library' ? (
             <LibraryScreen
-              user={mockUser}
+              user={user}
               onSelectPlaylist={handleSelectPlaylist}
               onSelectAlbum={handleSelectAlbum}
               onProfilePress={handleProfilePress}
             />
+          ) : activeTab === 'Profile' ? (
+            <ProfileScreen
+              user={user}
+              onUpdateUser={handleUpdateUser}
+              onSelectSong={handleSelectSong}
+              onSelectAlbum={handleAlbumPress}
+            />
           ) : (
             <TabPlaceholder
               tab={activeTab}
-              user={mockUser}
+              user={user}
               onReturnHome={() => setActiveTab('Home')}
             />
           )}

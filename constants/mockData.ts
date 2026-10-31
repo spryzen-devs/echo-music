@@ -12,6 +12,7 @@ export const mockUser: UserProfile = {
   name: 'Shantharam',
   greeting: 'Good morning,',
   avatar: require('../assets/images/music/avatar.png'),
+  bio: 'Music for a calmer me.',
 };
 
 export const mockFeaturedBanners: FeaturedBannerItem[] = [

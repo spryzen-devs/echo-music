@@ -4,6 +4,7 @@ export interface UserProfile {
   name: string;
   greeting: string;
   avatar: ImageSourcePropType;
+  bio?: string;
 }
 
 export interface FeaturedBannerItem {

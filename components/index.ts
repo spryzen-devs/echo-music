@@ -32,3 +32,15 @@ export { AlbumRow } from './library/AlbumRow';
 export { AlbumSection } from './library/AlbumSection';
 export { LibraryScreen } from './library/LibraryScreen';
 
+// Profile Components
+export { ProfileHero } from './profile/ProfileHero';
+export { ListeningStats } from './profile/ListeningStats';
+export { ProfileTabs } from './profile/ProfileTabs';
+export { QuoteBanner } from './profile/QuoteBanner';
+export { SettingsRow } from './profile/SettingsRow';
+export { ProfileOverview } from './profile/ProfileOverview';
+export { ProfileFavorites } from './profile/ProfileFavorites';
+export { ProfileListeningStatsView } from './profile/ProfileListeningStatsView';
+export { ProfileScreen } from './profile/ProfileScreen';
+
+
